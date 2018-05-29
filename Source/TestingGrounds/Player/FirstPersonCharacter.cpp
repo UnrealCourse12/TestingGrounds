@@ -8,6 +8,7 @@
 #include "GameFramework/InputSettings.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Weapons/Gun.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -44,12 +45,24 @@ void AFirstPersonCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+
+	if (!ensure(GunBlueprint)) { return; }
+	Gun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	//FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint")); TODO: Figure out later
+	Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	Gun->AnimInstance = Mesh1P->GetAnimInstance();
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Input
+
+void AFirstPersonCharacter::OnFire()
+{
+	if (Gun)
+	{
+		Gun->OnFire();
+	}
+}
 
 void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -60,8 +73,11 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	// Temporary fire event
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire);
+
 	// Bind fire event
-	// PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire); TODO: Not sure yet how we'll call the gun
+	//PlayerInputComponent->BindAction("Fire", IE_Pressed, Gun, &AGun::OnFire); TODO: Should switch to this call, but scope is issue for Gun
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFirstPersonCharacter::MoveForward);

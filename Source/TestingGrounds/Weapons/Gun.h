@@ -23,6 +23,9 @@ public:
 	// Sets default values for this actor's properties
 	AGun();
 
+	/** Fires a projectile. */
+	void OnFire();
+
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AProjectile> ProjectileClass;
@@ -45,9 +48,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	/** Fires a projectile. */
-	void OnFire();
 
 public:	
 	// Called every frame
